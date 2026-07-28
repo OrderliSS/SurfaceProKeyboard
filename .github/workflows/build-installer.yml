@@ -1,11 +1,12 @@
-name: Build Desktop Installer
+name: Build & Release Desktop Installer
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags: [ '*' ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -39,19 +40,37 @@ jobs:
             -o ./publish
 
       - name: Install Inno Setup
-        run: choco install innosetup
+        run: |
+          choco install innosetup --yes --no-progress
+          echo "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Compile Installer
-        run: iscc installer/setup.iss
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/setup.iss
+          Write-Host "--- Installer output ---"
+          Get-ChildItem installer_output -Recurse
 
       - name: Package Portable Zip
         run: |
+          New-Item -ItemType Directory -Force -Path installer_output | Out-Null
           Compress-Archive -Path ./publish/* -DestinationPath ./installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip
 
-      - name: Upload Artifacts (Installer EXE & Portable ZIP)
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SurfaceTypeCoverManager-Desktop-Client
           path: |
             installer_output/SurfaceTypeCoverManager_Setup_v1.0.exe
             installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip
+
+      - name: Create or Update GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          Write-Host "Creating release for tag: $tag"
+          gh release upload $tag `
+            installer_output/SurfaceTypeCoverManager_Setup_v1.0.exe `
+            installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip `
+            --clobber
