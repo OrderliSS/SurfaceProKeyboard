@@ -9,6 +9,7 @@ namespace SurfaceTypeCoverManager.Core.Models
         public bool IsConnected { get; set; }
         public string StatusText => IsConnected ? "Connected" : "Disconnected";
         public string ModelName { get; set; } = "Unavailable";
+        public string HostModel { get; set; } = "Unavailable";
         public string HardwareId { get; set; } = "Unavailable";
         public string VendorId { get; set; } = "Unavailable";
         public string ProductId { get; set; } = "Unavailable";
@@ -164,6 +165,7 @@ namespace SurfaceTypeCoverManager.Core.Models
         public bool MinimizeToTray { get; set; } = true;
         public bool BackgroundMonitoring { get; set; } = true;
         public bool EnableNotifications { get; set; } = true;
+        public bool SupportThirdPartyKeyboards { get; set; } = true;
         public int LogRetentionDays { get; set; } = 30;
         public int HistoryRetentionDays { get; set; } = 90;
         public string ExportLocation { get; set; } = string.Empty;

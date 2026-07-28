@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurfaceTypeCoverManager.UI"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurfaceTypeCoverManager.Tests", "SurfaceTypeCoverManager.Tests\SurfaceTypeCoverManager.Tests.csproj", "{4E2466BB-7744-45EA-AE33-B550A55CD26A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurfaceTypeCoverManager.Web", "SurfaceTypeCoverManager.Web\SurfaceTypeCoverManager.Web.csproj", "{8D06D0E6-C1BA-4208-BFB0-6683C9AE79B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{4E2466BB-7744-45EA-AE33-B550A55CD26A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E2466BB-7744-45EA-AE33-B550A55CD26A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E2466BB-7744-45EA-AE33-B550A55CD26A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D06D0E6-C1BA-4208-BFB0-6683C9AE79B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D06D0E6-C1BA-4208-BFB0-6683C9AE79B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D06D0E6-C1BA-4208-BFB0-6683C9AE79B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D06D0E6-C1BA-4208-BFB0-6683C9AE79B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

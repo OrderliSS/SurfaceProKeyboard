@@ -30,7 +30,10 @@ namespace SurfaceTypeCoverManager.Services.Services
             { 0x09B5, "Surface Pro Flex Keyboard" },
             { 0x09B6, "Surface Pro Flex Wireless Keyboard" },
             { 0x09C1, "Surface Keyboard" },
-            { 0x07E6, "Surface Laptop Keyboard" }
+            { 0x07E6, "Surface Laptop Keyboard" },
+            // Third-Party & Bluetooth Type Covers
+            { 0x8502, "Third-Party Bluetooth Keyboard (Broadcom)" }, // PID 8502 (VID 0A5C)
+            { 0x8514, "Third-Party Wireless Type Cover (Telink)" }   // PID 8514 (VID 248A)
         };
 
         public Task<SurfaceDeviceDetails> DetectSurfaceDeviceAsync()
@@ -44,7 +47,7 @@ namespace SurfaceTypeCoverManager.Services.Services
                     ref keyboardGuid,
                     null,
                     IntPtr.Zero,
-                    NativeInterop.DIGCF_PRESENT | NativeInterop.DIGCF_DEVICEINTERFACE);
+                    NativeInterop.DIGCF_PRESENT);
 
                 if (deviceInfoSet == IntPtr.Zero || deviceInfoSet == (IntPtr)(-1))
                 {
@@ -82,19 +85,34 @@ namespace SurfaceTypeCoverManager.Services.Services
 
                         string combined = $"{hwIds} {instanceId} {friendlyName} {desc} {mfg}".ToUpperInvariant();
 
-                        if (combined.Contains("VID_045E") || combined.Contains("SURFACE") || combined.Contains("TYPE COVER"))
+                        bool isSurface = combined.Contains("VID_045E") || combined.Contains("SURFACE") || combined.Contains("TYPE COVER");
+                        bool isThirdParty = combined.Contains("0A5C") || combined.Contains("248A") || (combined.Contains("BLUETOOTH") && combined.Contains("KEYBOARD"));
+
+                        if (isSurface || isThirdParty)
                         {
                             surfaceFound = true;
                             details.IsConnected = true;
-                            details.VendorId = "045E";
-
+                            
                             ParseVidPid(hwIds.Length > 0 ? hwIds : instanceId, out ushort vid, out ushort pid);
+                            
+                            // If ParseVidPid fails due to "VID&" formatting, we manually check
+                            if (vid == 0 && combined.Contains("0A5C")) vid = 0x0A5C;
+                            if (vid == 0 && combined.Contains("248A")) vid = 0x248A;
+                            if (pid == 0 && combined.Contains("8502")) pid = 0x8502;
+                            if (pid == 0 && combined.Contains("8514")) pid = 0x8514;
+
+                            details.VendorId = vid > 0 ? vid.ToString("X4") : (isThirdParty ? "Unknown" : "045E");
+
                             if (pid > 0)
                             {
                                 details.ProductId = pid.ToString("X4");
                                 if (SurfaceProductMap.TryGetValue(pid, out string? model))
                                 {
                                     details.ModelName = model;
+                                }
+                                else if (isThirdParty)
+                                {
+                                    details.ModelName = $"Third-Party Keyboard (PID: {details.ProductId})";
                                 }
                                 else
                                 {
@@ -107,7 +125,7 @@ namespace SurfaceTypeCoverManager.Services.Services
                             }
                             else
                             {
-                                details.ModelName = "Surface Type Cover";
+                                details.ModelName = isThirdParty ? "Third-Party Keyboard" : "Surface Type Cover";
                             }
 
                             details.HardwareId = string.IsNullOrEmpty(hwIds) ? "Unavailable" : hwIds;
@@ -143,10 +161,34 @@ namespace SurfaceTypeCoverManager.Services.Services
                 details.BacklightStatus = LockState.Unknown; // Hardware state requires specific MS driver, graceful fallback
                 details.TouchpadStatus = "Enabled";
                 details.TouchpadGesturesAvailable = true;
-                details.BatteryStatus = "Unavailable"; // Type covers draw host power directly
+                
+                if (details.IsConnected)
+                {
+                    details.BatteryStatus = GetBatteryLevel(details.ModelName.Contains("Third-Party") || details.ModelName.Contains("Bluetooth"));
+                }
+                else
+                {
+                    details.BatteryStatus = "Unavailable";
+                }
 
+                details.HostModel = GetHostModel();
                 return details;
             });
+        }
+
+        private static string GetHostModel()
+        {
+            try
+            {
+                using var key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\BIOS");
+                if (key != null)
+                {
+                    var val = key.GetValue("SystemProductName") as string;
+                    if (!string.IsNullOrEmpty(val)) return val;
+                }
+            }
+            catch { }
+            return "Unknown Host";
         }
 
         public IReadOnlyList<ServiceStatusInfo> GetSurfaceServicesStatus()
@@ -233,7 +275,7 @@ namespace SurfaceTypeCoverManager.Services.Services
                 ref keyboardGuid,
                 null,
                 IntPtr.Zero,
-                NativeInterop.DIGCF_PRESENT | NativeInterop.DIGCF_DEVICEINTERFACE);
+                NativeInterop.DIGCF_PRESENT);
 
             if (deviceInfoSet == IntPtr.Zero || deviceInfoSet == (IntPtr)(-1))
             {
@@ -274,6 +316,29 @@ namespace SurfaceTypeCoverManager.Services.Services
             details.CapsLock = (NativeInterop.GetKeyState(0x14) & 0x0001) != 0 ? LockState.On : LockState.Off;
             details.NumLock = (NativeInterop.GetKeyState(0x90) & 0x0001) != 0 ? LockState.On : LockState.Off;
             details.FnLock = LockState.Unknown; // Fn Lock is handled internal to keyboard firmware
+        }
+
+        private static string GetBatteryLevel(bool isThirdParty)
+        {
+            // For genuine type covers, they don't have batteries, they draw from the host.
+            // For third-party Bluetooth keyboards, we attempt to read system/device battery.
+            try
+            {
+                using var searcher = new ManagementObjectSearcher("SELECT EstimatedChargeRemaining FROM Win32_Battery");
+                foreach (ManagementObject obj in searcher.Get())
+                {
+                    if (obj["EstimatedChargeRemaining"] != null)
+                    {
+                        return $"{obj["EstimatedChargeRemaining"]}%" + (isThirdParty ? " (Host/System Battery Fallback)" : "");
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore WMI errors
+            }
+            
+            return isThirdParty ? "Unknown (Not reported by device)" : "Host Powered";
         }
 
         private static string GetStringProperty(IntPtr deviceInfoSet, NativeInterop.SP_DEVINFO_DATA devInfoData, NativeInterop.DEVPROPKEY key)
