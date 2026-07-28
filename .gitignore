@@ -8,3 +8,5 @@
 *.sln.docstates
 .idea/
 *.userprefs
+publish/
+installer_output/

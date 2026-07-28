@@ -1,0 +1,56 @@
+name: Build Desktop Installer
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Package Windows Desktop App
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore SurfaceTypeCoverManager.sln
+
+      - name: Run Unit Tests
+        run: dotnet test SurfaceTypeCoverManager.Tests/SurfaceTypeCoverManager.Tests.csproj --configuration Release --no-restore
+
+      - name: Publish Self-Contained Win-x64 Application
+        run: |
+          dotnet publish SurfaceTypeCoverManager.UI/SurfaceTypeCoverManager.UI.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true `
+            -o ./publish
+
+      - name: Install Inno Setup Compiler
+        uses: crazy-max/ghaction-inno-setup@v3
+        with:
+          path: installer/setup.iss
+
+      - name: Package Portable Zip
+        run: |
+          Compress-Archive -Path ./publish/* -DestinationPath ./installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip
+
+      - name: Upload Artifacts (Installer EXE & Portable ZIP)
+        uses: actions/upload-artifact@v4
+        with:
+          name: SurfaceTypeCoverManager-Desktop-Client
+          path: |
+            installer_output/SurfaceTypeCoverManager_Setup_v1.0.exe
+            installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip
