@@ -1,0 +1,37 @@
+<UserControl x:Class="SurfaceTypeCoverManager.UI.Views.EventLogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10">
+            <!-- Header Card -->
+            <Border Style="{StaticResource CardPanel}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Live Event Viewer Log Monitor" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
+                        <TextBlock Text="Real-time monitoring of Microsoft-Windows-Kernel-PnP and DeviceSetupManager events" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="200" Padding="8,6" Background="#0F172A" Foreground="White" BorderBrush="#334155" Margin="0,0,8,0" />
+                        <Button Content="Fetch Event Viewer Logs" Command="{Binding FetchSystemLogsCommand}" Padding="12,6" Background="{StaticResource AccentCyanBrush}" Foreground="#0F172A" FontWeight="Bold" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Event Stream DataGrid -->
+            <Border Style="{StaticResource CardPanel}" Margin="6,12,6,6">
+                <DataGrid ItemsSource="{Binding LogEntries}" AutoGenerateColumns="False" IsReadOnly="True" Background="#0F172A" RowBackground="#1E293B" AlternatingRowBackground="#172033" Foreground="White" BorderBrush="#334155" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#334155" Height="460">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Timestamp" Binding="{Binding Timestamp, StringFormat={}{0:HH:mm:ss.fff}}" Width="140" />
+                        <DataGridTextColumn Header="Level" Binding="{Binding Level}" Width="100" />
+                        <DataGridTextColumn Header="Source / Provider" Binding="{Binding Source}" Width="220" />
+                        <DataGridTextColumn Header="Message / Event Content" Binding="{Binding Message}" Width="*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

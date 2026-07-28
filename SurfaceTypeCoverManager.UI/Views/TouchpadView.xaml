@@ -1,0 +1,74 @@
+<UserControl x:Class="SurfaceTypeCoverManager.UI.Views.TouchpadView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10">
+            <!-- Touchpad Status Overview Card -->
+            <Border Style="{StaticResource CardPanel}">
+                <StackPanel>
+                    <TextBlock Text="Surface Precision Touchpad" FontSize="20" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" Margin="0,0,0,12" />
+                    <UniformGrid Columns="3" Margin="0,8,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Touchpad Status" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{Binding Touchpad.IsEnabled, Converter={x:Null}}" Margin="0,4,0,0" FontSize="18" FontWeight="Bold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="🟢 Enabled" />
+                                        <Setter Property="Foreground" Value="{StaticResource AccentEmeraldBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Touchpad.IsEnabled}" Value="False">
+                                                <Setter Property="Text" Value="🔴 Disabled" />
+                                                <Setter Property="Foreground" Value="{StaticResource AccentRoseBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="Precision Touchpad (PTP)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="{Binding Touchpad.HasPrecisionTouchpadSupport, Converter={x:Null}}" Margin="0,4,0,0" FontSize="18" FontWeight="Bold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="🟢 Supported" />
+                                        <Setter Property="Foreground" Value="{StaticResource AccentEmeraldBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Touchpad.HasPrecisionTouchpadSupport}" Value="False">
+                                                <Setter Property="Text" Value="ℹ️ Generic HID Touchpad" />
+                                                <Setter Property="Foreground" Value="{StaticResource AccentAmberBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel>
+                            <TextBlock Text="Windows Gestures" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                            <TextBlock Text="🟢 Multi-Finger Active" Foreground="{StaticResource AccentEmeraldBrush}" FontSize="18" FontWeight="Bold" Margin="0,4,0,0" />
+                        </StackPanel>
+                    </UniformGrid>
+                </StackPanel>
+            </Border>
+
+            <!-- Touchpad Interactive Test Area Card -->
+            <Border Style="{StaticResource CardPanel}" Margin="6,12,6,6">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <TextBlock Text="Pointer Activity &amp; Gesture Test Pad" FontSize="16" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" VerticalAlignment="Center" />
+                        <Button Content="Record Touchpad Event" Command="{Binding SimulateActivityCommand}" HorizontalAlignment="Right" Padding="12,6" Background="{StaticResource AccentCyanBrush}" Foreground="#0F172A" FontWeight="Bold" />
+                    </Grid>
+
+                    <Border Background="#0F172A" BorderBrush="#334155" BorderThickness="2" CornerRadius="12" Height="220" Margin="0,0,0,12">
+                        <Grid>
+                            <TextBlock Text="Move cursor or swipe multi-finger gestures inside this area" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" />
+                        </Grid>
+                    </Border>
+
+                    <TextBlock Text="{Binding Touchpad.ActivityDetails}" Foreground="{StaticResource AccentEmeraldBrush}" FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
