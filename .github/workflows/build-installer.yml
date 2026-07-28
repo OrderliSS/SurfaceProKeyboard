@@ -38,10 +38,11 @@ jobs:
             -p:EnableCompressionInSingleFile=true `
             -o ./publish
 
-      - name: Install Inno Setup Compiler
-        uses: crazy-max/ghaction-inno-setup@v3
-        with:
-          path: installer/setup.iss
+      - name: Install Inno Setup
+        run: choco install innosetup
+
+      - name: Compile Installer
+        run: iscc installer/setup.iss
 
       - name: Package Portable Zip
         run: |
