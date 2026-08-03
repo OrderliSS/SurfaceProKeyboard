@@ -158,7 +158,7 @@ namespace SurfaceTypeCoverManager.Services.Services
                     DroppedEvents = reader.GetInt32(8),
                     AverageLatencyMs = reader.GetDouble(9),
                     MaxLatencyMs = reader.GetDouble(10),
-                    LatencyDataPointsJson = reader.GetString(11)
+                    LatencyDataPointsJson = reader.IsDBNull(11) ? "[]" : reader.GetString(11)
                 });
             }
 

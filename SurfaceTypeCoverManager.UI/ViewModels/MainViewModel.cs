@@ -53,7 +53,7 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
             SettingsVM = settingsVM;
 
             _currentView = DashboardVM;
-            _deviceWatcher.DeviceStateChanged += (s, e) => DeviceStatus = _deviceWatcher.CurrentDevice;
+            _deviceWatcher.DeviceStateChanged += (s, e) => App.Current?.Dispatcher?.Invoke(() => DeviceStatus = _deviceWatcher.CurrentDevice);
             DeviceStatus = _deviceWatcher.CurrentDevice;
         }
 

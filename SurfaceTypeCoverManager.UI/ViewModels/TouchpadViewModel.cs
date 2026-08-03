@@ -16,7 +16,7 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
         public TouchpadViewModel(ITouchpadService touchpadService)
         {
             _touchpadService = touchpadService;
-            _touchpadService.TouchpadActivityDetected += (s, e) => Refresh();
+            _touchpadService.TouchpadActivityDetected += (s, e) => App.Current?.Dispatcher?.Invoke(() => Refresh());
             Refresh();
         }
 

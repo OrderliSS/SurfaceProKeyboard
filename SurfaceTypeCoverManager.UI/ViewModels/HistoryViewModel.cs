@@ -26,16 +26,20 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
         private async Task RefreshHistoryAsync()
         {
             var connections = await _databaseService.GetConnectionHistoryAsync();
-            ConnectionHistory.Clear();
-            foreach (var c in connections) ConnectionHistory.Add(c);
-
             var typings = await _databaseService.GetTypingHistoryAsync();
-            TypingHistory.Clear();
-            foreach (var t in typings) TypingHistory.Add(t);
-
             var diagnostics = await _databaseService.GetDiagnosticHistoryAsync();
-            DiagnosticHistory.Clear();
-            foreach (var d in diagnostics) DiagnosticHistory.Add(d);
+
+            App.Current?.Dispatcher?.Invoke(() =>
+            {
+                ConnectionHistory.Clear();
+                foreach (var c in connections) ConnectionHistory.Add(c);
+
+                TypingHistory.Clear();
+                foreach (var t in typings) TypingHistory.Add(t);
+
+                DiagnosticHistory.Clear();
+                foreach (var d in diagnostics) DiagnosticHistory.Add(d);
+            });
         }
     }
 }

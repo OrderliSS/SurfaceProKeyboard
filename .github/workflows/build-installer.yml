@@ -60,7 +60,7 @@ jobs:
         with:
           name: SurfaceTypeCoverManager-Desktop-Client
           path: |
-            installer_output/SurfaceTypeCoverManager_Setup_v1.0.exe
+            installer_output/SurfaceTypeCoverManager_Setup_*.exe
             installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip
 
       - name: Create or Update GitHub Release
@@ -70,7 +70,13 @@ jobs:
         run: |
           $tag = "${{ github.ref_name }}"
           Write-Host "Creating release for tag: $tag"
+
+          # Create the release if it doesn't exist
+          gh release create $tag --title "Surface Type Cover Manager $tag" --notes "Release $tag of Surface Type Cover Manager" --draft=false 2>$null
+
+          # Upload artifacts (--clobber replaces if they exist)
+          $installer = Get-ChildItem installer_output/SurfaceTypeCoverManager_Setup_*.exe | Select-Object -First 1
           gh release upload $tag `
-            installer_output/SurfaceTypeCoverManager_Setup_v1.0.exe `
+            $installer.FullName `
             installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip `
             --clobber

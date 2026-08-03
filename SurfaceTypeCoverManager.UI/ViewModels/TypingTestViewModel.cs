@@ -87,6 +87,7 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
             _stopwatch.Restart();
             IsTestRunning = true;
             StatusMessage = "Test in progress... Type the text above.";
+            _keyboardService.KeyPressed -= OnKeyPressed;
             _keyboardService.KeyPressed += OnKeyPressed;
         }
 

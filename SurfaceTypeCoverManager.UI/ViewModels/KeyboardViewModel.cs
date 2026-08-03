@@ -48,24 +48,30 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
 
         private void OnKeyStroke(object? sender, KeyStrokeInfo e)
         {
-            CurrentKey = _keyboardService.CurrentKey;
-            ModifierState = _keyboardService.ModifierState;
-            EstimatedLatencyMs = _keyboardService.EstimatedLatencyMs;
-            PollingRateHz = _keyboardService.PollingRateHz;
-            IsGhostingDetected = _keyboardService.IsGhostingDetected;
-            MaxRollover = _keyboardService.MaxRolloverDetected;
-
-            var pressed = _keyboardService.CurrentlyPressedKeys;
-            PressedKeysText = pressed.Count > 0 ? string.Join(", ", pressed) : "None";
-
-            VisualActiveKeys.Clear();
-            foreach (var k in pressed)
+            App.Current?.Dispatcher?.Invoke(() =>
             {
-                VisualActiveKeys.Add(k.ToUpperInvariant());
-            }
+                CurrentKey = _keyboardService.CurrentKey;
+                ModifierState = _keyboardService.ModifierState;
+                EstimatedLatencyMs = _keyboardService.EstimatedLatencyMs;
+                PollingRateHz = _keyboardService.PollingRateHz;
+                IsGhostingDetected = _keyboardService.IsGhostingDetected;
+                MaxRollover = _keyboardService.MaxRolloverDetected;
 
-            var stuck = _keyboardService.StuckKeys;
-            StuckKeysText = stuck.Count > 0 ? string.Join(", ", stuck) : "None";
+                var pressed = _keyboardService.CurrentlyPressedKeys;
+                PressedKeysText = pressed != null && pressed.Count > 0 ? string.Join(", ", pressed) : "None";
+
+                VisualActiveKeys.Clear();
+                if (pressed != null)
+                {
+                    foreach (var k in pressed)
+                    {
+                        VisualActiveKeys.Add(k.ToUpperInvariant());
+                    }
+                }
+
+                var stuck = _keyboardService.StuckKeys;
+                StuckKeysText = stuck != null && stuck.Count > 0 ? string.Join(", ", stuck) : "None";
+            });
         }
     }
 }

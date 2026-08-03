@@ -6,10 +6,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
-    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -18,6 +18,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+
+    <Version>2.0.0</Version>
+    <AssemblyTitle>Surface Type Cover Manager</AssemblyTitle>
+    <Description>Windows desktop application for monitoring, diagnosing, and managing Microsoft Surface Type Covers and Signature Keyboards.</Description>
+    <Company>OrderliSS</Company>
+    <Product>Surface Type Cover Manager</Product>
+    <Copyright>Copyright © 2024-2026 OrderliSS</Copyright>
   </PropertyGroup>
 
 </Project>

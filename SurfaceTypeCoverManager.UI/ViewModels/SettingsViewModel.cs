@@ -23,7 +23,7 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
         {
             _settingsService = settingsService;
             _notificationService = notificationService;
-            _settings = _settingsService.CurrentSettings;
+            _settings = _settingsService.CurrentSettings ?? new AppSettings();
         }
 
         [RelayCommand]

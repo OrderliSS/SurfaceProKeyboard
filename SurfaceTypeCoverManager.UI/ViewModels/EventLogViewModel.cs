@@ -60,19 +60,25 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
 
         private void RefreshLogView()
         {
-            LogEntries.Clear();
-            var all = _eventLogService.RecentLogs;
-            foreach (var item in all.Where(MatchesFilter).OrderByDescending(x => x.Timestamp))
+            App.Current?.Dispatcher?.Invoke(() =>
             {
-                LogEntries.Add(item);
-            }
+                LogEntries.Clear();
+                var all = _eventLogService.RecentLogs;
+                if (all != null)
+                {
+                    foreach (var item in all.Where(MatchesFilter).OrderByDescending(x => x.Timestamp))
+                    {
+                        LogEntries.Add(item);
+                    }
+                }
+            });
         }
 
         private bool MatchesFilter(LogEventEntry entry)
         {
             if (string.IsNullOrWhiteSpace(SearchQuery)) return true;
-            return entry.Message.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
-                   entry.Source.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase);
+            return (entry.Message ?? "").Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                   (entry.Source ?? "").Contains(SearchQuery, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

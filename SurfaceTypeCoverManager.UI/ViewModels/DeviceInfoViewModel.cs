@@ -35,7 +35,7 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
         private async Task LoadPropertiesAsync()
         {
             _allItems = await Task.Run(() => _surfaceService.GetSetupApiProperties().ToList());
-            FilterProperties();
+            App.Current?.Dispatcher?.Invoke(() => FilterProperties());
         }
 
         private void FilterProperties()
@@ -43,9 +43,9 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
             DeviceProperties.Clear();
             var filtered = string.IsNullOrWhiteSpace(SearchFilter)
                 ? _allItems
-                : _allItems.Where(p => p.PropertyName.Contains(SearchFilter, StringComparison.OrdinalIgnoreCase)
-                                     || p.PropertyValue.Contains(SearchFilter, StringComparison.OrdinalIgnoreCase)
-                                     || p.Category.Contains(SearchFilter, StringComparison.OrdinalIgnoreCase));
+                : _allItems.Where(p => (p.PropertyName ?? "").Contains(SearchFilter, StringComparison.OrdinalIgnoreCase)
+                                     || (p.PropertyValue ?? "").Contains(SearchFilter, StringComparison.OrdinalIgnoreCase)
+                                     || (p.Category ?? "").Contains(SearchFilter, StringComparison.OrdinalIgnoreCase));
 
             foreach (var item in filtered)
             {

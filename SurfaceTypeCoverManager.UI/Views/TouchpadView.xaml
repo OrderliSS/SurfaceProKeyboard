@@ -10,7 +10,7 @@
                     <UniformGrid Columns="3" Margin="0,8,0,0">
                         <StackPanel>
                             <TextBlock Text="Touchpad Status" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{Binding Touchpad.IsEnabled, Converter={x:Null}}" Margin="0,4,0,0" FontSize="18" FontWeight="Bold">
+                            <TextBlock Margin="0,4,0,0" FontSize="18" FontWeight="Bold">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="🟢 Enabled" />
@@ -28,7 +28,7 @@
 
                         <StackPanel>
                             <TextBlock Text="Precision Touchpad (PTP)" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
-                            <TextBlock Text="{Binding Touchpad.HasPrecisionTouchpadSupport, Converter={x:Null}}" Margin="0,4,0,0" FontSize="18" FontWeight="Bold">
+                            <TextBlock Margin="0,4,0,0" FontSize="18" FontWeight="Bold">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="🟢 Supported" />

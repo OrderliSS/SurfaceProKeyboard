@@ -36,21 +36,24 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
         private async Task LoadHistoryAsync()
         {
             var history = await _databaseService.GetConnectionHistoryAsync();
-            ConnectionEvents.Clear();
-
-            int arrivals = 0, removals = 0, reconnects = 0;
-
-            foreach (var evt in history)
+            App.Current?.Dispatcher?.Invoke(() =>
             {
-                ConnectionEvents.Add(evt);
-                if (evt.EventType.Equals("Arrival", StringComparison.OrdinalIgnoreCase)) arrivals++;
-                else if (evt.EventType.Equals("Removal", StringComparison.OrdinalIgnoreCase)) removals++;
-                else if (evt.EventType.Equals("Reconnect", StringComparison.OrdinalIgnoreCase)) reconnects++;
-            }
+                ConnectionEvents.Clear();
 
-            TotalArrivals = arrivals;
-            TotalRemovals = removals;
-            TotalReconnects = reconnects;
+                int arrivals = 0, removals = 0, reconnects = 0;
+
+                foreach (var evt in history)
+                {
+                    ConnectionEvents.Add(evt);
+                    if (evt.EventType.Equals("Arrival", StringComparison.OrdinalIgnoreCase)) arrivals++;
+                    else if (evt.EventType.Equals("Removal", StringComparison.OrdinalIgnoreCase)) removals++;
+                    else if (evt.EventType.Equals("Reconnect", StringComparison.OrdinalIgnoreCase)) reconnects++;
+                }
+
+                TotalArrivals = arrivals;
+                TotalRemovals = removals;
+                TotalReconnects = reconnects;
+            });
         }
     }
 }

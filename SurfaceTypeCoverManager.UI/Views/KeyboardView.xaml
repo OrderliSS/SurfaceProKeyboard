@@ -112,7 +112,7 @@
                 <Border Style="{StaticResource CardPanel}">
                     <StackPanel>
                         <TextBlock Text="Ghosting Detection" FontSize="14" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
-                        <TextBlock Text="{Binding IsGhostingDetected, Converter={x:Null}}" Margin="0,8,0,0" FontSize="16" FontWeight="Bold">
+                        <TextBlock Margin="0,8,0,0" FontSize="16" FontWeight="Bold">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value="🟢 Clear (No Ghosting)" />

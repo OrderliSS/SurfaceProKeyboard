@@ -79,6 +79,7 @@ namespace SurfaceTypeCoverManager.Services.Services
         public void StartKeyHook(IntPtr windowHandle)
         {
             if (windowHandle == IntPtr.Zero) return;
+            StopKeyHook();
             _windowHandle = windowHandle;
 
             _hwndSource = HwndSource.FromHwnd(windowHandle);
@@ -128,18 +129,28 @@ namespace SurfaceTypeCoverManager.Services.Services
             string keyName = KeyInterop.KeyFromVirtualKey(vkCode).ToString();
             CurrentKey = keyName;
 
+            bool isStuck = false;
             lock (_pressedVkCodes)
             {
+                // Check stuck BEFORE updating timestamp
+                if (_keyDownTimes.TryGetValue(vkCode, out var downTime))
+                {
+                    isStuck = (now - downTime).TotalSeconds >= 5.0;
+                }
+                else
+                {
+                    _keyDownTimes.TryAdd(vkCode, now);
+                }
+
                 _pressedVkCodes.Add(vkCode);
-                _keyDownTimes.TryAdd(vkCode, now);
 
                 if (_pressedVkCodes.Count > MaxRolloverDetected)
                 {
                     MaxRolloverDetected = _pressedVkCodes.Count;
                 }
 
-                // Simple Ghosting check: >4 non-modifier keys pressed concurrently
-                int nonModifiers = _pressedVkCodes.Count(vk => vk != 0x11 && vk != 0x12 && vk != 0x10 && vk != 0x5B && vk != 0x5C);
+                // Ghosting check: >4 non-modifier keys pressed concurrently (including L/R variants)
+                int nonModifiers = _pressedVkCodes.Count(vk => vk != 0x10 && vk != 0x11 && vk != 0x12 && vk != 0x5B && vk != 0x5C && vk != 0xA0 && vk != 0xA1 && vk != 0xA2 && vk != 0xA3 && vk != 0xA4 && vk != 0xA5);
                 IsGhostingDetected = nonModifiers >= 4;
             }
 
@@ -152,7 +163,7 @@ namespace SurfaceTypeCoverManager.Services.Services
                 Modifiers = ModifierState,
                 LatencyMs = EstimatedLatencyMs,
                 IsGhosted = IsGhostingDetected,
-                IsStuck = (now - _keyDownTimes.GetValueOrDefault(vkCode, now)).TotalSeconds >= 5.0
+                IsStuck = isStuck
             };
 
             KeyPressed?.Invoke(this, info);

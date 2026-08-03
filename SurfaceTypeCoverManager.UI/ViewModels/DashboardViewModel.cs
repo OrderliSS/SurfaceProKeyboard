@@ -21,7 +21,7 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
         public DashboardViewModel(IDeviceWatcherService deviceWatcher)
         {
             _deviceWatcher = deviceWatcher;
-            _deviceWatcher.DeviceStateChanged += (s, e) => UpdateDevice();
+            _deviceWatcher.DeviceStateChanged += (s, e) => App.Current?.Dispatcher?.Invoke(() => UpdateDevice());
             UpdateDevice();
 
             _timer = new DispatcherTimer
@@ -47,8 +47,9 @@ namespace SurfaceTypeCoverManager.UI.ViewModels
 
         private void UpdateDuration()
         {
+            if (Device == null) return;
             var dur = Device.ConnectionDuration;
-            ConnectionDurationText = $"{dur.Hours:D2}:{dur.Minutes:D2}:{dur.Seconds:D2}";
+            ConnectionDurationText = $"{(int)dur.TotalHours:D2}:{dur.Minutes:D2}:{dur.Seconds:D2}";
         }
     }
 }

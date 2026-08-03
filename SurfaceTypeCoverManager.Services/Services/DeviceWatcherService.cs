@@ -40,6 +40,7 @@ namespace SurfaceTypeCoverManager.Services.Services
         {
             if (windowHandle == IntPtr.Zero) return;
 
+            StopMonitoring();
             _windowHandle = windowHandle;
             _hwndSource = HwndSource.FromHwnd(windowHandle);
             _hwndSource?.AddHook(WndProc);

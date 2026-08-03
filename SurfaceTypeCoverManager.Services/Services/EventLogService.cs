@@ -95,6 +95,7 @@ namespace SurfaceTypeCoverManager.Services.Services
         {
             try
             {
+                StopListening();
                 string query = "*[System[Provider[@Name='Microsoft-Windows-Kernel-PnP']]]";
                 var elq = new EventLogQuery("System", PathType.LogName, query);
                 _watcher = new EventLogWatcher(elq);
@@ -102,7 +103,8 @@ namespace SurfaceTypeCoverManager.Services.Services
                 {
                     if (e.EventRecord != null)
                     {
-                        AddLog(e.EventRecord.ProviderName, e.EventRecord.FormatDescription() ?? "PnP Event", DiagnosticLevel.Info);
+                        using var record = e.EventRecord;
+                        AddLog(record.ProviderName, record.FormatDescription() ?? "PnP Event", DiagnosticLevel.Info);
                     }
                 };
                 _watcher.Enabled = true;

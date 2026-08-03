@@ -100,7 +100,7 @@
         <!-- Bottom Footer Status Bar -->
         <Border Grid.Row="2" Background="#0F172A" Padding="14,6" BorderBrush="#2A3952" BorderThickness="0,1,0,0">
             <Grid>
-                <TextBlock Text="Surface Type Cover Manager v1.0 | .NET 8 WPF | Win32 SetupAPI &amp; HID Telemetry" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
+                <TextBlock Text="Surface Type Cover Manager v2.0 | .NET 8 WPF | Win32 SetupAPI &amp; HID Telemetry" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" />
                 <TextBlock Text="CPU: &lt; 1% | RAM: &lt; 85MB | Event-Driven Active" Foreground="{StaticResource TextSecondaryBrush}" FontSize="11" HorizontalAlignment="Right" />
             </Grid>
         </Border>

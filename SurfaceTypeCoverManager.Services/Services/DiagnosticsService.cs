@@ -67,7 +67,7 @@ namespace SurfaceTypeCoverManager.Services.Services
                     healthy = false;
                 }
 
-                bool surfaceFound = report.Keyboards.Any(k => k.PropertyValue.Contains("045E", StringComparison.OrdinalIgnoreCase) || k.PropertyValue.Contains("Surface", StringComparison.OrdinalIgnoreCase));
+                bool surfaceFound = report.Keyboards.Any(k => (k.PropertyValue ?? "").Contains("045E", StringComparison.OrdinalIgnoreCase) || (k.PropertyValue ?? "").Contains("Surface", StringComparison.OrdinalIgnoreCase));
                 if (surfaceFound)
                 {
                     health.Add("🟢 Surface Hardware: Surface Type Cover / Keyboard device node verified.");

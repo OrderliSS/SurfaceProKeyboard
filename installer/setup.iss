@@ -1,13 +1,13 @@
 ; Inno Setup Script for Surface Type Cover Manager
 
 #define MyAppName "Surface Type Cover Manager"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "2.0.0"
 #define MyAppPublisher "OrderliSS"
 #define MyAppURL "https://github.com/OrderliSS/SurfaceProKeyboard"
 #define MyAppExeName "SurfaceTypeCoverManager.UI.exe"
 
 [Setup]
-AppId={{D37F8E8A-025C-4315-B62D-08579DF82B21}
+AppId={{D37F8E8A-025C-4315-B62D-08579DF82B21}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
@@ -18,11 +18,14 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=..\installer_output
-OutputBaseFilename=SurfaceTypeCoverManager_Setup_v1.0
+OutputBaseFilename=SurfaceTypeCoverManager_Setup_v{#MyAppVersion}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
+ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+UninstallDisplayName={#MyAppName}
+VersionInfoVersion={#MyAppVersion}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -41,3 +44,6 @@ Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: au
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}"
