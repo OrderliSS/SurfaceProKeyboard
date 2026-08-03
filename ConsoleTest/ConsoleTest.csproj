@@ -1,10 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <ItemGroup>
+    <ProjectReference Include="..\SurfaceTypeCoverManager.Services\SurfaceTypeCoverManager.Services.csproj" />
+  </ItemGroup>
+
   <PropertyGroup>
     <Copyright>Developed by Orderli Software (orderli.com.au)</Copyright>
     <Company>Orderli Software</Company>
     <Product>SurfacePro Keyboard Client</Product>
-    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

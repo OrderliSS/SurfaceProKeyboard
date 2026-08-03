@@ -5,6 +5,7 @@ using System.Text;
 using SurfaceTypeCoverManager.Core.Interfaces;
 using SurfaceTypeCoverManager.Core.Models;
 using SurfaceTypeCoverManager.Services.Interop;
+using Microsoft.Win32.SafeHandles;
 
 namespace SurfaceTypeCoverManager.Services.Services
 {
@@ -124,6 +125,67 @@ namespace SurfaceTypeCoverManager.Services.Services
             if (pidIdx >= 0 && pidIdx + 8 <= upper.Length)
             {
                 ushort.TryParse(upper.Substring(pidIdx + 4, 4), System.Globalization.NumberStyles.HexNumber, null, out pid);
+            }
+        }
+
+        public bool SetLighting(string devicePath, bool power, int brightness, string hexColor)
+        {
+            if (string.IsNullOrEmpty(devicePath) || devicePath == "Unavailable")
+            {
+                return false;
+            }
+
+            try
+            {
+                using SafeFileHandle handle = NativeInterop.CreateFileW(
+                    devicePath,
+                    NativeInterop.GENERIC_READ | NativeInterop.GENERIC_WRITE,
+                    NativeInterop.FILE_SHARE_READ | NativeInterop.FILE_SHARE_WRITE,
+                    IntPtr.Zero,
+                    NativeInterop.OPEN_EXISTING,
+                    0,
+                    IntPtr.Zero);
+
+                if (handle.IsInvalid)
+                {
+                    return false;
+                }
+
+                // Construct a best-effort standard HID lighting feature report.
+                // Note: Third party boards (like Broadcom Bluetooth) often use proprietary usage pages
+                // and byte sequences. This is a generic standard implementation.
+                
+                byte r = 255, g = 255, b = 255;
+                if (!string.IsNullOrEmpty(hexColor) && hexColor.StartsWith("#") && hexColor.Length == 7)
+                {
+                    r = Convert.ToByte(hexColor.Substring(1, 2), 16);
+                    g = Convert.ToByte(hexColor.Substring(3, 2), 16);
+                    b = Convert.ToByte(hexColor.Substring(5, 2), 16);
+                }
+
+                // Typically Report ID 0 is used for single-report devices, or a specific ID.
+                // For RGB keyboards without documentation, we can only try setting standard feature/output.
+                byte[] report = new byte[32]; // Standard size
+                report[0] = 0x00; // Report ID
+                report[1] = (byte)(power ? 0x01 : 0x00); // Power state
+                report[2] = (byte)brightness; // Brightness
+                report[3] = r;
+                report[4] = g;
+                report[5] = b;
+
+                // Try Feature Report first
+                bool success = NativeInterop.HidD_SetFeature(handle, report, (uint)report.Length);
+                if (!success)
+                {
+                    // Fallback to Output Report
+                    success = NativeInterop.HidD_SetOutputReport(handle, report, (uint)report.Length);
+                }
+                
+                return success;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

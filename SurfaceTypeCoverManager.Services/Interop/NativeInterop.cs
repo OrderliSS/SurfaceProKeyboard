@@ -1,12 +1,19 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 
 namespace SurfaceTypeCoverManager.Services.Interop
 {
     public static class NativeInterop
     {
         #region Constants & GUIDs
+        public const uint GENERIC_READ = 0x80000000;
+        public const uint GENERIC_WRITE = 0x40000000;
+        public const uint FILE_SHARE_READ = 0x00000001;
+        public const uint FILE_SHARE_WRITE = 0x00000002;
+        public const uint OPEN_EXISTING = 3;
+
         public const int DIGCF_PRESENT = 0x00000002;
         public const int DIGCF_ALLCLASSES = 0x00000004;
         public const int DIGCF_DEVICEINTERFACE = 0x00000010;
@@ -215,6 +222,24 @@ namespace SurfaceTypeCoverManager.Services.Interop
 
         [DllImport("hid.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern bool HidD_GetSerialNumberString(IntPtr HidDeviceObject, byte[] Buffer, uint BufferLength);
+
+        [DllImport("hid.dll", SetLastError = true)]
+        public static extern bool HidD_SetFeature(SafeFileHandle HidDeviceObject, byte[] ReportBuffer, uint ReportBufferLength);
+
+        [DllImport("hid.dll", SetLastError = true)]
+        public static extern bool HidD_SetOutputReport(SafeFileHandle HidDeviceObject, byte[] ReportBuffer, uint ReportBufferLength);
+        #endregion
+
+        #region Kernel32 Native Imports
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern SafeFileHandle CreateFileW(
+            string lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            IntPtr lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            IntPtr hTemplateFile);
         #endregion
 
         #region User32 & Device Notification Native Imports

@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <Copyright>Developed by Orderli Software (orderli.com.au)</Copyright>
+    <Company>Orderli Software</Company>
+    <Product>SurfacePro Keyboard Client</Product>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -23,3 +26,6 @@
   </PropertyGroup>
 
 </Project>
+
+
+

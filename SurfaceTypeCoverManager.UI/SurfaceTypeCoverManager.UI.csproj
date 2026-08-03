@@ -3,28 +3,54 @@
   <ItemGroup>
     <ProjectReference Include="..\SurfaceTypeCoverManager.Services\SurfaceTypeCoverManager.Services.csproj" />
     <ProjectReference Include="..\SurfaceTypeCoverManager.Core\SurfaceTypeCoverManager.Core.csproj" />
+    <ProjectReference Include="..\SurfaceTypeCoverManager.Web\SurfaceTypeCoverManager.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4078.44" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
 
+  <!-- Copy wwwroot from the Web project into UI output -->
+  <ItemGroup>
+    <Content Include="..\SurfaceTypeCoverManager.Web\wwwroot\**" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <PropertyGroup>
+    <Copyright>Developed by Orderli Software (orderli.com.au)</Copyright>
+    <Company>Orderli Software</Company>
+    <Product>SurfacePro Keyboard Client</Product>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-
     <Version>2.0.0</Version>
     <AssemblyTitle>Surface Type Cover Manager</AssemblyTitle>
     <Description>Windows desktop application for monitoring, diagnosing, and managing Microsoft Surface Type Covers and Signature Keyboards.</Description>
     <Company>OrderliSS</Company>
     <Product>Surface Type Cover Manager</Product>
     <Copyright>Copyright © 2024-2026 OrderliSS</Copyright>
+    <ApplicationIcon>app_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="app_icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
+
+
+

@@ -1,41 +1,87 @@
-using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Interop;
-using SurfaceTypeCoverManager.Core.Interfaces;
-using SurfaceTypeCoverManager.UI.ViewModels;
+using System.Windows.Input;
+using SurfaceTypeCoverManager.Web;
+using System.Linq;
+using Microsoft.Extensions.Hosting;
 
 namespace SurfaceTypeCoverManager.UI
 {
     public partial class MainWindow : Window
     {
-        private readonly IDeviceWatcherService _deviceWatcher;
-        private readonly IKeyboardService _keyboardService;
+        private CancellationTokenSource? _webServerCts;
 
-        public MainWindow(MainViewModel mainVM, IDeviceWatcherService deviceWatcher, IKeyboardService keyboardService)
+        public MainWindow()
         {
             InitializeComponent();
-            DataContext = mainVM;
-            _deviceWatcher = deviceWatcher;
-            _keyboardService = keyboardService;
-
-            Loaded += MainWindow_Loaded;
-            Unloaded += MainWindow_Unloaded;
+            StartEmbeddedWebServer();
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void StartEmbeddedWebServer()
         {
-            IntPtr hwnd = new WindowInteropHelper(this).Handle;
-            if (hwnd != IntPtr.Zero)
+            _webServerCts = new CancellationTokenSource();
+
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var wwwroot = Path.Combine(baseDir, "wwwroot");
+
+            Task.Run(async () =>
             {
-                _deviceWatcher.StartMonitoring(hwnd);
-                _keyboardService.StartKeyHook(hwnd);
+                try
+                {
+                    var app = WebServerHost.BuildApp(wwwroot);
+                    app.Urls.Clear();
+                    app.Urls.Add("http://127.0.0.1:0"); // Bind to dynamic port
+                    
+                    await app.StartAsync(_webServerCts.Token);
+                    
+                    var address = app.Urls.FirstOrDefault() ?? "http://127.0.0.1:5000";
+
+                    // Safely initialize WebView2 on the UI thread
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        InitializeWebView(address);
+                    });
+
+                    await app.WaitForShutdownAsync(_webServerCts.Token);
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Web server error: {ex.Message}");
+                }
+            });
+        }
+
+        private async void InitializeWebView(string url)
+        {
+            try
+            {
+                await webView.EnsureCoreWebView2Async();
+                webView.Source = new Uri(url);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"WebView2 Init error: {ex.Message}");
             }
         }
 
-        private void MainWindow_Unloaded(object sender, RoutedEventArgs e)
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _deviceWatcher.StopMonitoring();
-            _keyboardService.StopKeyHook();
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            _webServerCts?.Cancel();
+            this.Close();
         }
     }
 }

@@ -1,0 +1,34 @@
+{
+  "name": "surface-type-cover-manager",
+  "version": "1.0.0",
+  "description": "Surface Pro Type Cover Manager Desktop Client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.surfacetypecover.manager",
+    "productName": "Surface Type Cover Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.png",
+      "uninstallerIcon": "build/icon.png",
+      "installerHeader": "build/installerHeader.bmp",
+      "installerSidebar": "build/installerSidebar.bmp",
+      "uninstallerSidebar": "build/installerSidebar.bmp"
+    }
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
