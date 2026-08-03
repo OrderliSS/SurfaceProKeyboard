@@ -20,7 +20,10 @@
 
   <!-- Copy wwwroot from the Web project into UI output -->
   <ItemGroup>
-    <Content Include="..\SurfaceTypeCoverManager.Web\wwwroot\**" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\SurfaceTypeCoverManager.Web\wwwroot\**" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <PropertyGroup>
