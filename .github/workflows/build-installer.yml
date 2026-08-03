@@ -79,6 +79,11 @@ jobs:
         run: |
           $tag = "${{ github.ref_name }}"
           Write-Host "Creating release for tag: $tag"
+          try {
+            gh release view $tag
+          } catch {
+            gh release create $tag --title "Release $tag" --generate-notes
+          }
           gh release upload $tag `
             installer_output/SurfaceTypeCoverManager_Setup_v1.0.exe `
             installer_output/SurfaceTypeCoverManager_Portable_win-x64.zip `
