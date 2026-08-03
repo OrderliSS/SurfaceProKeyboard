@@ -49,15 +49,46 @@ public static class WebServerHost
             return Results.Json(details);
         });
 
-        app.MapPost("/api/lighting", (LightingRequest request) =>
+        app.MapPost("/api/lighting", async (LightingRequest request) =>
         {
             Console.WriteLine($"Lighting Update Received: Power={request.Power}, Brightness={request.Brightness}%, Color={request.Color}");
 
             try
             {
-                byte vk = request.Power && request.Brightness > 50 ? VK_KBD_BRIGHTNESS_UP : VK_KBD_BRIGHTNESS_DOWN;
-                keybd_event(vk, 0, KEYEVENTF_EXTENDEDKEY, UIntPtr.Zero);
-                keybd_event(vk, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, UIntPtr.Zero);
+                // Attempt OS-level brightness control (works for Surface Type Covers and standard HID keyboards)
+                if (request.Power)
+                {
+                    // Map Brightness 33/66/100 to UP/DOWN keystrokes
+                    // This is a naive implementation; normally you'd read current brightness.
+                    byte vk = request.Brightness > 50 ? VK_KBD_BRIGHTNESS_UP : VK_KBD_BRIGHTNESS_DOWN;
+                    keybd_event(vk, 0, KEYEVENTF_EXTENDEDKEY, UIntPtr.Zero);
+                    keybd_event(vk, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, UIntPtr.Zero);
+                }
+
+                // Attempt to send HID feature report for RGB keyboards
+                var service = new SurfaceService();
+                var details = await service.DetectSurfaceDeviceAsync();
+                
+                if (details.IsConnected && !string.IsNullOrEmpty(details.InstanceId))
+                {
+                    var hidService = new HidService();
+                    // Attempt to resolve the true device path from the instance ID
+                    var hids = hidService.EnumerateHidDevices();
+                    string? targetPath = null;
+                    foreach(var hid in hids)
+                    {
+                        if(hid.DevicePath != null && hid.DevicePath.Contains(details.InstanceId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            targetPath = hid.DevicePath;
+                            break;
+                        }
+                    }
+
+                    if (targetPath != null)
+                    {
+                        hidService.SetLighting(targetPath, request.Power, request.Brightness, request.Color);
+                    }
+                }
             }
             catch { }
 

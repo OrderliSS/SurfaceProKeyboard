@@ -274,28 +274,36 @@
             background-color: #fff;
         }
 
-        /* Range Slider */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
+        /* Segmented Buttons for Brightness */
+        .btn-group {
+            display: flex;
+            background: var(--bg-color);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            width: fit-content;
+        }
+        .btn-group button {
             background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-right: 1px solid var(--border);
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            border-radius: 50%;
+        .btn-group button:last-child {
+            border-right: none;
+        }
+        .btn-group button:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+        .btn-group button.active {
             background: var(--accent);
-            cursor: pointer;
-            margin-top: -8px;
-            box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            cursor: pointer;
-            background: var(--border);
-            border-radius: 2px;
+            color: #fff;
         }
 
         /* Color Picker */
@@ -429,8 +437,12 @@
                 </div>
 
                 <div class="control-group">
-                    <label class="control-label">Brightness (<span id="brightVal">100</span>%)</label>
-                    <input type="range" id="brightSlider" min="0" max="100" value="100" oninput="document.getElementById('brightVal').innerText = this.value" onchange="updateLighting()">
+                    <label class="control-label">Brightness</label>
+                    <div class="btn-group" id="brightnessGroup">
+                        <button onclick="setBrightness(33)" id="btnBright33">Low</button>
+                        <button onclick="setBrightness(66)" id="btnBright66">Medium</button>
+                        <button onclick="setBrightness(100)" id="btnBright100" class="active">High</button>
+                    </div>
                 </div>
 
                 <div class="control-group">
@@ -528,32 +540,44 @@
         }
 
         // Lighting Control
-        async function updateLighting() {
-            const isOn = document.getElementById('lightToggle').checked;
-            const brightness = document.getElementById('brightSlider').value;
-            const color = document.getElementById('colorPicker').value;
+        let currentBrightness = 100;
+        function setBrightness(level) {
+            currentBrightness = level;
+            document.querySelectorAll('#brightnessGroup button').forEach(b => b.classList.remove('active'));
+            document.getElementById('btnBright' + level).classList.add('active');
+            updateLighting();
+        }
 
-            // Update UI visualization (simulate backlight via brightness filter on image)
-            const img = document.getElementById('hardwareHeroImg');
-            if(img) {
-                if(isOn) {
-                    const brightnessFilter = 0.5 + (brightness / 100) * 0.8;
-                    img.style.filter = `brightness(${brightnessFilter}) sepia(1) hue-rotate(180deg) saturate(3)`;
-                } else {
-                    img.style.filter = `brightness(0.5)`;
+        let lightingDebounce = null;
+        function updateLighting() {
+            clearTimeout(lightingDebounce);
+            lightingDebounce = setTimeout(async () => {
+                const isOn = document.getElementById('lightToggle').checked;
+                const brightness = currentBrightness;
+                const color = document.getElementById('colorPicker').value;
+
+                // Update UI visualization (simulate backlight via brightness filter on image)
+                const img = document.getElementById('hardwareHeroImg');
+                if(img) {
+                    if(isOn) {
+                        const brightnessFilter = 0.5 + (brightness / 100) * 0.8;
+                        img.style.filter = `brightness(${brightnessFilter}) sepia(1) hue-rotate(180deg) saturate(3)`;
+                    } else {
+                        img.style.filter = `brightness(0.5)`;
+                    }
                 }
-            }
 
-            // Send to backend
-            try {
-                await fetch('/api/lighting', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ power: isOn, brightness: parseInt(brightness), color: color })
-                });
-            } catch (err) {
-                console.error("Failed to update lighting", err);
-            }
+                // Send to backend
+                try {
+                    await fetch('/api/lighting', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ power: isOn, brightness: brightness, color: color })
+                    });
+                } catch (err) {
+                    console.error("Failed to update lighting", err);
+                }
+            }, 100);
         }
 
         fetchDeviceStatus();

@@ -18,6 +18,7 @@ namespace SurfaceTypeCoverManager.Core.Interfaces
     {
         IReadOnlyList<HidDeviceInfo> EnumerateHidDevices();
         HidDeviceInfo? GetDeviceDetails(string devicePath);
+        bool SetLighting(string devicePath, bool power, int brightness, string hexColor);
     }
 
     public interface ISurfaceService
