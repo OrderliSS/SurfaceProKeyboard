@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Copyright>Developed by Orderli (orderli.com.au)</Copyright>
-    <Company>Orderli</Company>
+    <Copyright>Developed by Orderli Software (orderli.com.au)</Copyright>
+    <Company>Orderli Software</Company>
     <Product>SurfacePro Keyboard Client</Product>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -10,5 +10,6 @@
   </PropertyGroup>
 
 </Project>
+
 
 
