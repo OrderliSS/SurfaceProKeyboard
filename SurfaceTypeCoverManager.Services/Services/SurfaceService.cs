@@ -85,7 +85,7 @@ namespace SurfaceTypeCoverManager.Services.Services
 
                         string combined = $"{hwIds} {instanceId} {friendlyName} {desc} {mfg}".ToUpperInvariant();
 
-                        bool isSurface = combined.Contains("VID_045E") || combined.Contains("SURFACE") || combined.Contains("TYPE COVER");
+                        bool isSurface = combined.Contains("VID_045E") || combined.Contains("SURFACE") || combined.Contains("TYPE COVER") || combined.Contains("MSHW");
                         bool isThirdParty = combined.Contains("0A5C") || combined.Contains("248A") || (combined.Contains("BLUETOOTH") && combined.Contains("KEYBOARD"));
 
                         if (isSurface || isThirdParty)
@@ -147,8 +147,72 @@ namespace SurfaceTypeCoverManager.Services.Services
 
                     if (!surfaceFound)
                     {
-                        details.IsConnected = false;
-                        details.ModelName = "Unavailable";
+                        try
+                        {
+                            using var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%keyboard%'");
+                            foreach (ManagementObject obj in searcher.Get())
+                            {
+                                string name = obj["Name"]?.ToString() ?? "";
+                                string hwIdObj = "";
+                                if (obj["HardwareID"] is string[] hwIdsArray) hwIdObj = string.Join(" ", hwIdsArray);
+                                string deviceId = obj["DeviceID"]?.ToString() ?? "";
+                                string mfg = obj["Manufacturer"]?.ToString() ?? "";
+
+                                string combinedWmi = $"{name} {hwIdObj} {deviceId} {mfg}".ToUpperInvariant();
+                                bool isSurfaceWmi = combinedWmi.Contains("VID_045E") || combinedWmi.Contains("SURFACE") || combinedWmi.Contains("TYPE COVER") || combinedWmi.Contains("MSHW");
+                                bool isThirdPartyWmi = combinedWmi.Contains("0A5C") || combinedWmi.Contains("248A") || (combinedWmi.Contains("BLUETOOTH") && combinedWmi.Contains("KEYBOARD"));
+
+                                if (isSurfaceWmi || isThirdPartyWmi)
+                                {
+                                    surfaceFound = true;
+                                    details.IsConnected = true;
+                                    ParseVidPid(hwIdObj.Length > 0 ? hwIdObj : deviceId, out ushort vid, out ushort pid);
+                                    if (vid == 0 && combinedWmi.Contains("0A5C")) vid = 0x0A5C;
+                                    if (vid == 0 && combinedWmi.Contains("248A")) vid = 0x248A;
+                                    if (pid == 0 && combinedWmi.Contains("8502")) pid = 0x8502;
+                                    if (pid == 0 && combinedWmi.Contains("8514")) pid = 0x8514;
+                                    details.VendorId = vid > 0 ? vid.ToString("X4") : (isThirdPartyWmi ? "Unknown" : "045E");
+                                    
+                                    if (pid > 0)
+                                    {
+                                        details.ProductId = pid.ToString("X4");
+                                        if (SurfaceProductMap.TryGetValue(pid, out string? model))
+                                        {
+                                            details.ModelName = model;
+                                        }
+                                        else if (isThirdPartyWmi)
+                                        {
+                                            details.ModelName = $"Third-Party Keyboard (PID: {details.ProductId})";
+                                        }
+                                        else
+                                        {
+                                            details.ModelName = $"Surface Keyboard (PID: {details.ProductId})";
+                                        }
+                                    }
+                                    else if (!string.IsNullOrEmpty(name) && name != "Unavailable")
+                                    {
+                                        details.ModelName = name;
+                                    }
+                                    else
+                                    {
+                                        details.ModelName = isThirdPartyWmi ? "Third-Party Keyboard" : "Surface Type Cover";
+                                    }
+
+                                    details.HardwareId = string.IsNullOrEmpty(hwIdObj) ? "Unavailable" : hwIdObj;
+                                    details.FriendlyName = name;
+                                    details.Manufacturer = string.IsNullOrEmpty(mfg) ? "Microsoft Corporation" : mfg;
+                                    details.InstanceId = deviceId;
+                                    break;
+                                }
+                            }
+                        }
+                        catch { }
+
+                        if (!surfaceFound)
+                        {
+                            details.IsConnected = false;
+                            details.ModelName = "Unavailable";
+                        }
                     }
                 }
                 finally
@@ -172,6 +236,28 @@ namespace SurfaceTypeCoverManager.Services.Services
                 }
 
                 details.HostModel = GetHostModel();
+                
+                if (details.IsConnected)
+                {
+                    string instIdUpper = (details.InstanceId ?? "").ToUpperInvariant();
+                    string hwIdUpper = (details.HardwareId ?? "").ToUpperInvariant();
+                    string modelUpper = (details.ModelName ?? "").ToUpperInvariant();
+                    string allContext = $"{instIdUpper} {hwIdUpper} {modelUpper}";
+                    
+                    if (allContext.Contains("BTHENUM") || allContext.Contains("{00001124") || allContext.Contains("BLUETOOTH"))
+                    {
+                        details.ConnectionType = "Bluetooth";
+                    }
+                    else if (allContext.Contains("MSHW") || allContext.Contains("SPI") || allContext.Contains("I2C") || allContext.Contains("SURFACE"))
+                    {
+                        details.ConnectionType = "Surface Connect";
+                    }
+                    else
+                    {
+                        details.ConnectionType = "USB";
+                    }
+                }
+                
                 return details;
             });
         }
@@ -359,16 +445,17 @@ namespace SurfaceTypeCoverManager.Services.Services
             if (string.IsNullOrEmpty(input)) return;
 
             string upper = input.ToUpperInvariant();
-            int vidIdx = upper.IndexOf("VID_");
-            if (vidIdx >= 0 && vidIdx + 8 <= upper.Length)
+            
+            var vidMatch = System.Text.RegularExpressions.Regex.Match(upper, @"VID[_&](?:[0-9A-F]{4})?([0-9A-F]{4})");
+            if (vidMatch.Success)
             {
-                ushort.TryParse(upper.Substring(vidIdx + 4, 4), System.Globalization.NumberStyles.HexNumber, null, out vid);
+                ushort.TryParse(vidMatch.Groups[1].Value, System.Globalization.NumberStyles.HexNumber, null, out vid);
             }
 
-            int pidIdx = upper.IndexOf("PID_");
-            if (pidIdx >= 0 && pidIdx + 8 <= upper.Length)
+            var pidMatch = System.Text.RegularExpressions.Regex.Match(upper, @"PID[_&](?:[0-9A-F]{4})?([0-9A-F]{4})");
+            if (pidMatch.Success)
             {
-                ushort.TryParse(upper.Substring(pidIdx + 4, 4), System.Globalization.NumberStyles.HexNumber, null, out pid);
+                ushort.TryParse(pidMatch.Groups[1].Value, System.Globalization.NumberStyles.HexNumber, null, out pid);
             }
         }
     }

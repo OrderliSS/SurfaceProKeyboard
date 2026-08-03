@@ -1,49 +1,53 @@
-using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using SurfaceTypeCoverManager.Web;
 
 namespace SurfaceTypeCoverManager.UI
 {
     public partial class MainWindow : Window
     {
-        private Process _webServerProcess;
+        private CancellationTokenSource? _webServerCts;
+        private Thread? _webServerThread;
 
         public MainWindow()
         {
             InitializeComponent();
-            StartWebServer();
+            StartEmbeddedWebServer();
         }
 
-        private void StartWebServer()
+        private void StartEmbeddedWebServer()
         {
-            // Start the ASP.NET Core Web API backend in the background
-            try
-            {
-                var basePath = System.AppDomain.CurrentDomain.BaseDirectory;
-                // Since this runs in bin/Debug/net8.0-windows..., we need to point it to the Web project's output
-                // But for development, we can use the dotnet run command or point directly to the Web dll.
-                // Assuming the web app compiles to its own bin folder, we can just run dotnet on the Web dll,
-                // or just start the web executable. We'll start the web executable if it exists.
-                
-                string webExePath = Path.GetFullPath(Path.Combine(basePath, "..", "..", "..", "..", "..", "SurfaceTypeCoverManager.Web", "bin", "Debug", "net8.0-windows10.0.19041.0", "SurfaceTypeCoverManager.Web.exe"));
+            _webServerCts = new CancellationTokenSource();
 
-                if (File.Exists(webExePath))
-                {
-                    var startInfo = new ProcessStartInfo
-                    {
-                        FileName = webExePath,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WorkingDirectory = Path.GetDirectoryName(webExePath)
-                    };
-                    _webServerProcess = Process.Start(startInfo);
-                }
-            }
-            catch
+            // Resolve wwwroot from the assembly's base directory
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var wwwroot = Path.Combine(baseDir, "wwwroot");
+
+            // Run Kestrel on a dedicated background thread to avoid WPF STA conflicts
+            _webServerThread = new Thread(() =>
             {
-                // Ignore for now, WebView2 will just show a failed to connect if server isn't running
-            }
+                try
+                {
+                    var app = WebServerHost.BuildApp(wwwroot);
+                    app.RunAsync("http://localhost:5000").GetAwaiter().GetResult();
+                }
+                catch (OperationCanceledException)
+                {
+                    // Normal shutdown
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Web server error: {ex.Message}");
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "KestrelWebServer"
+            };
+            _webServerThread.Start();
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -59,10 +63,7 @@ namespace SurfaceTypeCoverManager.UI
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_webServerProcess != null && !_webServerProcess.HasExited)
-            {
-                _webServerProcess.Kill();
-            }
+            _webServerCts?.Cancel();
             this.Close();
         }
     }

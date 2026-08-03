@@ -11,6 +11,7 @@ namespace SurfaceTypeCoverManager.Core.Models
         public string ModelName { get; set; } = "Unavailable";
         public string HostModel { get; set; } = "Unavailable";
         public string HardwareId { get; set; } = "Unavailable";
+        public string ConnectionType { get; set; } = "Unknown";
         public string VendorId { get; set; } = "Unavailable";
         public string ProductId { get; set; } = "Unavailable";
         public string FirmwareVersion { get; set; } = "Unavailable";

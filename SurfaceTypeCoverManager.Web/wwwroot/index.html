@@ -369,6 +369,18 @@
                     <div class="field-title">Device Model</div>
                     <div class="field-value" id="modelName">--</div>
                 </div>
+                <div class="field-row" onclick="copyToClipboard(this, 'manufacturer')" title="Click to copy">
+                    <div class="field-title">Manufacturer</div>
+                    <div class="field-value" id="manufacturer">--</div>
+                </div>
+                <div class="field-row" onclick="copyToClipboard(this, 'vendorId')" title="Click to copy">
+                    <div class="field-title">Vendor ID</div>
+                    <div class="field-value" id="vendorId">--</div>
+                </div>
+                <div class="field-row" onclick="copyToClipboard(this, 'productId')" title="Click to copy">
+                    <div class="field-title">Product ID</div>
+                    <div class="field-value" id="productId">--</div>
+                </div>
                 <div class="field-row" onclick="copyToClipboard(this, 'connType')" title="Click to copy">
                     <div class="field-title">Connection</div>
                     <div class="field-value" id="connType">--</div>
@@ -384,6 +396,18 @@
                 <div class="field-row" onclick="copyToClipboard(this, 'hardwareId')" title="Click to copy">
                     <div class="field-title">Hardware ID</div>
                     <div class="field-value" style="font-family: monospace; font-size: 0.9rem;" id="hardwareId">--</div>
+                </div>
+                <div class="field-row" onclick="copyToClipboard(this, 'capsLock')" title="Click to copy">
+                    <div class="field-title">Caps Lock</div>
+                    <div class="field-value" id="capsLock">--</div>
+                </div>
+                <div class="field-row" onclick="copyToClipboard(this, 'numLock')" title="Click to copy">
+                    <div class="field-title">Num Lock</div>
+                    <div class="field-value" id="numLock">--</div>
+                </div>
+                <div class="field-row" onclick="copyToClipboard(this, 'instanceId')" title="Click to copy">
+                    <div class="field-title">Instance ID</div>
+                    <div class="field-value" style="font-family: monospace; font-size: 0.9rem;" id="instanceId">--</div>
                 </div>
             </div>
         </div>
@@ -476,12 +500,16 @@
 
                 document.getElementById('hostModel').textContent = data.hostModel;
                 document.getElementById('modelName').textContent = data.modelName;
+                document.getElementById('manufacturer').textContent = data.manufacturer || '--';
+                document.getElementById('vendorId').textContent = data.vendorId || '--';
+                document.getElementById('productId').textContent = data.productId || '--';
+                document.getElementById('connType').textContent = data.connectionType || 'Unknown';
                 document.getElementById('batteryLevel').textContent = data.batteryStatus;
-                document.getElementById('hardwareId').textContent = data.hardwareId || 'Unavailable';
                 document.getElementById('driverInfo').textContent = data.firmwareVersion || 'Unavailable';
-
-                const isBluetooth = data.modelName.includes('Bluetooth') || data.modelName.includes('Broadcom') || data.modelName.includes('Third-Party');
-                document.getElementById('connType').textContent = isBluetooth ? 'Bluetooth' : 'Surface Connect / I2C';
+                document.getElementById('hardwareId').textContent = data.hardwareId || 'Unavailable';
+                document.getElementById('capsLock').textContent = data.capsLock === 1 ? 'On' : (data.capsLock === 2 ? 'Off' : 'Unknown');
+                document.getElementById('numLock').textContent = data.numLock === 1 ? 'On' : (data.numLock === 2 ? 'Off' : 'Unknown');
+                document.getElementById('instanceId').textContent = data.instanceId || 'Unavailable';
 
                 // Update Image
                 const img = document.getElementById('hardwareHeroImg');

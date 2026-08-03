@@ -3,6 +3,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SurfaceTypeCoverManager.Services\SurfaceTypeCoverManager.Services.csproj" />
     <ProjectReference Include="..\SurfaceTypeCoverManager.Core\SurfaceTypeCoverManager.Core.csproj" />
+    <ProjectReference Include="..\SurfaceTypeCoverManager.Web\SurfaceTypeCoverManager.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
@@ -11,6 +16,11 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4078.44" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+  </ItemGroup>
+
+  <!-- Copy wwwroot from the Web project into UI output -->
+  <ItemGroup>
+    <Content Include="..\SurfaceTypeCoverManager.Web\wwwroot\**" Link="wwwroot\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <PropertyGroup>
