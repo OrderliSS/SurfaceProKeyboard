@@ -26,7 +26,7 @@
             </Border>
 
             <!-- WebView2 Content -->
-            <wv2:WebView2 Name="webView" Grid.Row="1" Source="http://localhost:5000" />
+            <wv2:WebView2 Name="webView" Grid.Row="1" />
         </Grid>
     </Border>
 </Window>

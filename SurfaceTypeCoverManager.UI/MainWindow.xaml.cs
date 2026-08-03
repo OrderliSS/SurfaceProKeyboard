@@ -22,32 +22,48 @@ namespace SurfaceTypeCoverManager.UI
         {
             _webServerCts = new CancellationTokenSource();
 
-            // Resolve wwwroot from the assembly's base directory
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var wwwroot = Path.Combine(baseDir, "wwwroot");
 
-            // Run Kestrel on a dedicated background thread to avoid WPF STA conflicts
-            _webServerThread = new Thread(() =>
+            Task.Run(async () =>
             {
                 try
                 {
                     var app = WebServerHost.BuildApp(wwwroot);
-                    app.RunAsync("http://localhost:5000").GetAwaiter().GetResult();
+                    app.Urls.Clear();
+                    app.Urls.Add("http://127.0.0.1:0"); // Bind to dynamic port
+                    
+                    await app.StartAsync(_webServerCts.Token);
+                    
+                    var address = app.Urls.FirstOrDefault() ?? "http://127.0.0.1:5000";
+
+                    // Safely initialize WebView2 on the UI thread
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        InitializeWebView(address);
+                    });
+
+                    await app.WaitForShutdownAsync(_webServerCts.Token);
                 }
-                catch (OperationCanceledException)
-                {
-                    // Normal shutdown
-                }
+                catch (OperationCanceledException) { }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Web server error: {ex.Message}");
                 }
-            })
+            });
+        }
+
+        private async void InitializeWebView(string url)
+        {
+            try
             {
-                IsBackground = true,
-                Name = "KestrelWebServer"
-            };
-            _webServerThread.Start();
+                await webView.EnsureCoreWebView2Async();
+                webView.Source = new Uri(url);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"WebView2 Init error: {ex.Message}");
+            }
         }
 
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
