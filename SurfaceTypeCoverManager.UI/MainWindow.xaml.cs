@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using SurfaceTypeCoverManager.Web;
+using System.Linq;
+using Microsoft.Extensions.Hosting;
 
 namespace SurfaceTypeCoverManager.UI
 {
     public partial class MainWindow : Window
     {
         private CancellationTokenSource? _webServerCts;
-        private Thread? _webServerThread;
 
         public MainWindow()
         {
