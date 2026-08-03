@@ -5,6 +5,9 @@
   </ItemGroup>
 
   <PropertyGroup>
+    <Copyright>Copyright © Orderli Software via Orderli Group 2026</Copyright>
+    <Company>Orderli Software</Company>
+    <Product>SurfacePro Keyboard Client</Product>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,3 +15,4 @@
   </PropertyGroup>
 
 </Project>
+

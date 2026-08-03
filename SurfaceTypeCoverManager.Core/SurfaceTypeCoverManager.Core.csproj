@@ -1,9 +1,13 @@
-ï»¿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Copyright>Copyright © Orderli Software via Orderli Group 2026</Copyright>
+    <Company>Orderli Software</Company>
+    <Product>SurfacePro Keyboard Client</Product>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>
+
