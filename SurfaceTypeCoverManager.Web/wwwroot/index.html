@@ -434,10 +434,10 @@
             <div class="card">
                 <div class="control-group">
                     <label class="control-label">Backlight Power</label>
-                    <label class="switch">
-                        <input type="checkbox" id="lightToggle" checked onchange="updateLighting()">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="btn-group" id="powerGroup">
+                        <button onclick="setPower(true)" id="btnPowerWake" class="active">Wake RGB</button>
+                        <button onclick="setPower(false)" id="btnPowerSleep">Sleep RGB</button>
+                    </div>
                 </div>
 
                 <div class="control-group">
@@ -544,7 +544,16 @@
         }
 
         // Lighting Control
+        let currentPower = true;
         let currentBrightness = 100;
+        
+        function setPower(isOn) {
+            currentPower = isOn;
+            document.querySelectorAll('#powerGroup button').forEach(b => b.classList.remove('active'));
+            document.getElementById(isOn ? 'btnPowerWake' : 'btnPowerSleep').classList.add('active');
+            updateLighting();
+        }
+
         function setBrightness(level) {
             currentBrightness = level;
             document.querySelectorAll('#brightnessGroup button').forEach(b => b.classList.remove('active'));
@@ -556,7 +565,7 @@
         function updateLighting() {
             clearTimeout(lightingDebounce);
             lightingDebounce = setTimeout(async () => {
-                const isOn = document.getElementById('lightToggle').checked;
+                const isOn = currentPower;
                 const brightness = currentBrightness;
                 const color = document.getElementById('colorPicker').value;
 
